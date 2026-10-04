@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Summarise benchmark/general_bench.py runs (4090 replication): accuracy with a 95% bootstrap interval per benchmark,
 letter KLD and agreement against BF16, and paired differences for files of identical size (ours vs Unsloth).
-  python benchmark/general_collect.py --runs /work/runs/general --model Qwen3.5-2B --out results/general
+  python benchmark/general_collect.py --runs $HN04B_RUNS/general --model Qwen3.5-2B --out results/general
 """
 import argparse, csv, glob, json, os
 

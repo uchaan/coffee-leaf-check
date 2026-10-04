@@ -1,4 +1,7 @@
-# 4090 server — benchmark log, Hack-Nation 04B
+# 4090 server: benchmark log, Hack-Nation 04B
+
+> Editor's note (added after the run): the fine-tuning code is now in `../../../fine-tuning/` and the final numbers are in
+> `../../../RESULTS.md`. Per-image rows were not published (`../../results/README.md`).
 
 Times KST. Container `hn04b-llama` (nvidia/cuda 12.1 devel), physical GPUs 6 and 7 (`--gpu 0` / `--gpu 1`).
 
@@ -97,7 +100,7 @@ These runs used the candidate text that the owner rejected; they are void and ar
 
 ## 11:55–12:25 KST: fine-tuned track (owner's change of scope; the brief said "No fine-tuning")
 - 2B quantised base + LoRA adapter served with `llama-server --lora`; evaluated with the unchanged harness
-  (`HN04B_SERVER_EXTRA`), results kept apart from the quantisation tables (not included in this repository).
+  (`HN04B_SERVER_EXTRA`), results kept apart from the quantisation tables (now in `../../../RESULTS.md`).
 - The A100 trains the adapter on BRACOL dev only (337 train / 82 early-stopping images); BRACOL test is untouched.
 - 12:2x: owner target 95% BRACOL test accuracy; on request the 4090 put every distinct JMuBEN image (3,756, preprocessed,
   manifest with an in_eval column) on shared storage as training data. JMuBEN is therefore not a clean test set for fine-tuned

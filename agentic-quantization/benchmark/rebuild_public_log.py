@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Rebuild public_gguf_log.csv from the downloaded files: revision and published SHA-256 (etag) from the
 metadata hf_hub_download leaves next to each file, SHA-256 recomputed and checked against it.
-  python benchmark/rebuild_public_log.py /work/models/public data/public_gguf_log.csv
+local_path is written relative to DEST (<repo>/<file>).
+  python benchmark/rebuild_public_log.py $HN04B_PUBLIC data/public_gguf_log.csv
 """
 import csv, datetime, hashlib, os, sys
 from multiprocessing import Pool
@@ -40,7 +41,7 @@ def main(dest, out):
         for repo, model, source, fn, p, rev, etag, ts in items:
             s = hashes[p]
             bad += s != etag
-            w.writerow([repo, rev, fn, model, source, os.path.getsize(p), s, etag, ts, p])
+            w.writerow([repo, rev, fn, model, source, os.path.getsize(p), s, etag, ts, os.path.join(repo, fn)])
     os.replace(out + ".tmp", out)
     print(len(items), "files;", bad, "with SHA-256 different from the HF-published hash")
 

@@ -1,0 +1,17 @@
+# Python 3.11. gguf comes from llama.cpp's gguf-py at the pinned commit ($LLAMA_CPP_DIR/gguf-py, on PYTHONPATH),
+# and quantizer/ggml_quant.py loads $LLAMA_CPP_DIR/build/bin/libggml-base.so.
+# quantizer/
+torch
+transformers>=5.5
+numpy
+pillow
+# benchmark/harness.py and the queues
+requests
+# benchmark/fetch_public.py, fetch_ours.py
+huggingface_hub
+# benchmark/collect.py (charts)
+matplotlib
+# benchmark/general_bench.py
+pandas
+pyarrow
+datasets

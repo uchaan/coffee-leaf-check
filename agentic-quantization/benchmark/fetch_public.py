@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Download the public GGUFs (language-model files at or under 1 GB, plus Unsloth Q4_K_M) and log
-repo, revision, file, bytes, SHA-256 and date to public_gguf_log.csv. Files are never renamed."""
+repo, revision, file, bytes, SHA-256 and date to public_gguf_log.csv. Files are never renamed.
+local_path is relative to DEST (<repo>/<file>); benchmark/make_jobs.py joins it to --public-dir.
+  python benchmark/fetch_public.py $HN04B_PUBLIC data/public_gguf_log.csv
+"""
 import csv, datetime, hashlib, os, sys
 from huggingface_hub import HfApi, hf_hub_download
 
@@ -31,7 +34,8 @@ def main(dest, log):
     with open(log, "a", newline="") as f:
         w = csv.writer(f)
         if new:
-            w.writerow(["repo", "revision", "file", "model", "source", "bytes", "sha256", "downloaded_utc", "local_path"])
+            w.writerow(["repo", "revision", "file", "model", "source", "bytes", "sha256", "hf_published_sha256",
+                        "downloaded_utc", "local_path"])
         for repo, model, source in REPOS:
             info = api.model_info(repo, files_metadata=True)
             for s in info.siblings:
@@ -50,7 +54,8 @@ def main(dest, log):
                 if lfs and getattr(lfs, "sha256", None) and lfs.sha256 != sha:
                     print("SHA MISMATCH", repo, s.rfilename, file=sys.stderr)
                 w.writerow([repo, info.sha, s.rfilename, model, source, os.path.getsize(p), sha,
-                            datetime.datetime.utcnow().strftime("%F %T"), p]); f.flush()
+                            getattr(lfs, "sha256", "") if lfs else "",
+                            datetime.datetime.utcnow().strftime("%F %T"), os.path.join(repo, s.rfilename)]); f.flush()
                 print("ok", repo, s.rfilename, flush=True)
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# Example run — Hack-Nation 04B, 2026-10-04 (KST)
+# Example run: Hack-Nation 04B, 2026-10-04 (KST)
 
 The run that produced the files in `../selection/` and the numbers in `../results/`. Two Claude Code sessions on two
 servers, one owner giving direction:
@@ -16,8 +16,9 @@ servers, one owner giving direction:
 
 What the logs show about the loop:
 - The owner set goals and made the calls reserved for them (prompt choice, targets, the extra fine-tuning track);
-  between those, the sessions ran iterations on their own — 112 successful builds on the A100 alone; 66 of the
-  files were handed to the benchmark side (`../selection/files.csv`).
+  between those, the sessions ran iterations on their own: 112 successful builds on the A100 alone. The 61 quantized
+  files handed to the benchmark side (32 ours-general, 29 ours-task) are listed in `../selection/files.csv`, with the BF16
+  and mmproj references and the fine-tuned package.
 - Each change of direction came from dev numbers read in the loop: text-only calibration → image + text calibration;
   IQ2_XXS bodies → UD-IQ2_M bodies with a smaller tied embedding (`-v2` templates), then a sweep of tied-embedding types.
 - The selection rule was written before any test number (`../selection/final.csv`); a test line seen early is recorded as a deviation.
@@ -26,4 +27,5 @@ The automation in `../loop/` is a cleaned-up, path-independent version of the sc
 (per-GPU build workers, an automatic check / dev runner and an event wait).
 
 `../quantizer/gptq_iq.py` differs from the copy used in the run (SHA-256 `b6601b44…` in `../selection/files.csv`) only in
-comments, log messages and one default value that `main()` overwrites from the model config.
+comments, log messages, an unused import and one default value that `main()` overwrites from the model config.
+The superseded text-only builds (rows citing `856f10f5`) used an earlier version that is not included.

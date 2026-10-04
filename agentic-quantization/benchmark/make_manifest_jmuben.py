@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Optional extra test set (Shared protocol): JMuBEN + JMuBEN2 (Mendeley t2r6rszp5c/1, tgv3zb82nd/1; CC BY 4.0).
+"""Optional extra test set (protocol: benchmark/README.md): JMuBEN + JMuBEN2 (Mendeley t2r6rszp5c/1, tgv3zb82nd/1; CC BY 4.0).
 Test only: per class, sort the images by SHA-256 of the file bytes and take the first 600.
 The archives hold many byte-identical copies (Healthy: 18,984 files, 63 distinct images), so copies are
 collapsed first (one row per distinct SHA-256 within a class, the first path in sort order); a class with
 fewer than 600 distinct images contributes all of them. No SHA-256 occurs in two classes.
 Files that PIL cannot decode (damaged JPEGs, e.g. Healthy/2 (691).jpg ends in 00 00, not FF D9) are dropped
 before the selection and counted.
-  python benchmark/make_manifest_jmuben.py --root /work/data/jmuben/extracted --out manifest_jmuben.csv
+  python benchmark/make_manifest_jmuben.py --root $JMUBEN_ROOT --out manifest_jmuben.csv
 """
 import argparse, collections, csv, hashlib, os
 

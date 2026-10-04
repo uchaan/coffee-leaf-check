@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Collect every run of one prompt into results.csv, per-image files, charts and summary.md.
 
-  python benchmark/collect.py --prompt prompt_v1 --jobs /work/jobs.csv --out results/
+  python benchmark/collect.py --prompt prompt_v1 --jobs $WORK/jobs.csv --out results/
 """
 import argparse, csv, json, os, shutil, sys
 
@@ -10,7 +10,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import harness as H  # noqa: E402
-from queue_common import tag_of  # noqa: E402
+from queue_common import RUNS, tag_of  # noqa: E402
 
 COLS = ["model", "source", "quant_name", "lm_file", "lm_bytes", "mmproj_file", "mmproj_bytes", "total_bytes",
         "bpw", "calibration", "llama_cpp_commit", "dataset", "split", "n", "forced_acc", "forced_macro_f1",
@@ -23,12 +23,12 @@ STYLE = {"ours-general": ("#1f77b4", "o"), "ours-task": ("#17becf", "s"), "unslo
          "official": ("#2ca02c", "D"), "others": ("#7f7f7f", "v")}
 
 
-RESULTS_README = """# Results (4090 server, frozen prompt `protocol/prompt_v1.txt`)
+RESULTS_README = """# Results (frozen prompt `protocol/prompt_v1.txt`)
 
 | File | What |
 |---|---|
 | `summary.md` | matched-size differences, under-1 GB package table, confusion matrix, JMuBEN table, checks |
-| `results.csv` | one row per model x source x file x dataset x split (Shared-protocol schema); BRACOL dev and test, JMuBEN test |
+| `results.csv` | one row per model x source x file x dataset x split (metrics: `benchmark/README.md`); BRACOL dev and test, JMuBEN test |
 | `f1_<model>.png` | forced macro-F1 on BRACOL test vs language-model bytes, 95% bootstrap intervals, 1 GB package line |
 | `kld_<model>.png` | letter KLD vs BF16 on BRACOL test vs language-model bytes (log scale) |
 | `per_image/<run>.csv.gz` | per image (gzip): path, image SHA-256, split, label, P(A)..P(F), argmax, forced argmax, letter mass, sampled letter |
@@ -36,6 +36,7 @@ RESULTS_README = """# Results (4090 server, frozen prompt `protocol/prompt_v1.tx
 | `low_letter_mass.csv` | files that put on average under 90% of the first-token probability on A to F |
 
 Every number is recomputed by `benchmark/collect.py` from the per-image files. Metric definitions: `benchmark/README.md`.
+`per_image/` can be large; leave it out when publishing and say so.
 """
 
 
@@ -421,11 +422,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--prompt", required=True, help="prompt file stem, e.g. prompt_v1")
     ap.add_argument("--jobs", required=True)
-    ap.add_argument("--runs", default=os.environ.get("HN04B_RUNS", "/work/runs"))
+    ap.add_argument("--runs", default=RUNS)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--files", default=os.environ.get("HN04B_FILES", "/work/files.csv"), help="handoff files.csv")
-    ap.add_argument("--final", default=os.environ.get("HN04B_FINAL", "/work/final.csv"),
-                    help="handoff final.csv: when present, only these ours files enter the comparisons")
+    ap.add_argument("--files", default=os.environ.get("HN04B_FILES", os.path.join(H.ROOT, "selection", "files.csv")), help="files.csv (every built file)")
+    ap.add_argument("--final", default=os.environ.get("HN04B_FINAL", os.path.join(H.ROOT, "selection", "final.csv")),
+                    help="final.csv: when present, only these ours files enter the comparisons")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     rows, runs, odd = load_rows(a)
@@ -446,7 +447,9 @@ def main():
     jm = [r for r in rows if r["dataset"] == "JMuBEN"]
     charts(test, a.out, odd.get("final"))
     summary(test, runs, a.out, a.prompt, odd, jm)
-    open(os.path.join(a.out, "README.md"), "w").write(RESULTS_README)
+    readme = os.path.join(a.out, "README.md")
+    if not os.path.exists(readme):  # keep a hand-edited results/README.md
+        open(readme, "w").write(RESULTS_README)
     print(f"{len(rows)} rows, {len(runs)} runs -> {a.out}")
 
 

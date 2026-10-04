@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Poll selection/files.csv (a copy kept fresh from origin by the host), download every listed GGUF from
 a Hugging Face repo (--repo or HN04B_HF_REPO), verify its SHA-256 against files.csv, then rebuild the jobs CSV.
-  python benchmark/fetch_ours.py --repo OWNER/REPO --files /work/files.csv --dest /work/models/a100 --jobs /work/jobs.csv
+  python benchmark/fetch_ours.py --repo OWNER/REPO --files selection/files.csv --dest $WORK/models/a100 --jobs $WORK/jobs.csv
 """
 import argparse, csv, hashlib, os, subprocess, sys, time
 from huggingface_hub import hf_hub_download
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from queue_common import RUNS  # noqa: E402
 ROOT = os.path.dirname(HERE)
 
 
@@ -37,7 +39,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--files", required=True); ap.add_argument("--dest", required=True)
     ap.add_argument("--jobs", required=True); ap.add_argument("--interval", type=int, default=60)
-    ap.add_argument("--runs", default=os.environ.get("HN04B_RUNS", "/work/runs"))
+    ap.add_argument("--runs", default=RUNS)
     ap.add_argument("--repo", default=os.environ.get("HN04B_HF_REPO"), help="Hugging Face repo holding the files of files.csv")
     a = ap.parse_args()
     if not a.repo: sys.exit("set --repo or HN04B_HF_REPO")

@@ -3,20 +3,20 @@
 job it re-reads the jobs CSV and takes the first job (BF16 reference first, then file order) that is not
 done and not claimed by another worker, so several workers (one per GPU) can share one jobs list and
 jobs can be added or reordered while they run. Results do not depend on the GPU: the same file gave
-bit-identical probabilities on physical GPUs 6 and 7.
+bit-identical probabilities on two different GPUs.
 
 jobs CSV columns: model,source,quant_name,lm_path,calibration
 A job = harness run --split all (scored against the BF16 rows of the same prompt), then text KLD.
 mmproj and BF16 per model: <a100-dir>/<model>/mmproj-<model>-Q8_0.gguf and <model>-BF16.gguf.
 Stops when <runs>/STOP exists and nothing runnable is left.
   python benchmark/gpu_queue.py --models Qwen3.5-2B,Qwen3.5-0.8B --gpu 0 --port 8090 \
-      --prompt protocol/prompt_v1.txt --jobs /work/jobs.csv --a100-dir /work/models/a100
+      --prompt protocol/prompt_v1.txt --jobs $WORK/jobs.csv --a100-dir $WORK/models/a100
 """
 import argparse, csv, os, shutil, socket, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from queue_common import tag_of  # noqa: E402
+from queue_common import RUNS, WORK, tag_of  # noqa: E402
 
 
 def claim(path):
@@ -34,7 +34,7 @@ def main():
     ap.add_argument("--gpu", required=True); ap.add_argument("--port", required=True)
     ap.add_argument("--prompt", required=True); ap.add_argument("--jobs", required=True)
     ap.add_argument("--a100-dir", required=True)
-    ap.add_argument("--runs", default=os.environ.get("HN04B_RUNS", "/work/runs"))
+    ap.add_argument("--runs", default=RUNS)
     ap.add_argument("--no-textkld", action="store_true")
     ap.add_argument("--dataset", choices=["bracol", "jmuben"], default="bracol",
                     help="jmuben: optional extra test set (test split only, tag suffix __jmuben, no text KLD)")
@@ -88,7 +88,7 @@ def main():
                    "--gpu", a.gpu, "--port", a.port, "--tag", tag]
             if a.dataset == "jmuben":
                 cmd += ["--manifest", os.path.join(os.path.dirname(HERE), "manifest_jmuben.csv"),
-                        "--data-root", os.environ.get("JMUBEN_ROOT", "/work/data/jmuben/extracted")]
+                        "--data-root", os.environ.get("JMUBEN_ROOT", os.path.join(WORK, "jmuben", "raw"))]
             if j["source"] != "bf16":
                 cmd += ["--ref", ref]
             print(time.strftime("%T"), "RUN", tag, flush=True)

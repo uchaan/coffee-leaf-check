@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Write the jobs CSV for the queues: BF16 first, then ours (selection/files.csv), Unsloth, official, others.
 Calibration is read from each GGUF's metadata (quantize.imatrix.*), never guessed.
-  python benchmark/make_jobs.py --a100-dir /work/models/a100 --public-log data/public_gguf_log.csv --out /work/jobs.csv
+  python benchmark/make_jobs.py --a100-dir $WORK/models/a100 --public-dir $HN04B_PUBLIC --out $WORK/jobs.csv
+--a100-dir holds the files of selection/files.csv at their listed paths (<model>/<file>, plus <model>/<model>-BF16.gguf
+and <model>/mmproj-<model>-Q8_0.gguf); public files are <public-dir>/<local_path of data/public_gguf_log.csv>.
 """
 import argparse, csv, os, sys
 
@@ -76,15 +78,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--a100-dir", required=True)
     ap.add_argument("--public-log", default=os.path.join(ROOT, "data", "public_gguf_log.csv"))
+    ap.add_argument("--public-dir", default=os.environ.get("HN04B_PUBLIC", os.path.join(os.environ.get("WORK", "work"), "public")),
+                    help="root that the relative local_path column of the public log is joined to")
     ap.add_argument("--files", default=os.environ.get("HN04B_FILES", os.path.join(ROOT, "selection", "files.csv")))
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     jobs = []
     for r in csv.DictReader(open(a.files)):
-        if r["variant"] == "bf16" or r["variant"].startswith("ours"):
-            src = "bf16" if r["variant"] == "bf16" else r["variant"]
-            if src not in ("bf16", "ours-general", "ours-task"):
-                src = "ours-task" if "task" in r["variant"] else "ours-general"
+        # LM files only: the ours-finetuned rows (LoRA adapter, fine-tuned mmproj) are not --lm inputs
+        if r["variant"] in ("bf16", "ours-general", "ours-task"):
+            src = r["variant"]
             p = os.path.join(a.a100_dir, r["file"])
             q = "BF16" if src == "bf16" else quant_name(r["model"], os.path.basename(r["file"]))
             if q.startswith("ours-"):
@@ -93,8 +96,9 @@ def main():
                          "calibration": r.get("calibration", "")})
     if os.path.exists(a.public_log):
         for r in csv.DictReader(open(a.public_log)):
+            p = os.path.join(a.public_dir, r["local_path"])  # an absolute local_path is kept as is
             jobs.append({"model": r["model"], "source": r["source"], "quant_name": quant_name(r["model"], r["file"]),
-                         "lm_path": r["local_path"], "calibration": calib(r["local_path"])})
+                         "lm_path": p, "calibration": calib(p)})
     dedup = {}
     for j in jobs:  # one job per file; a file listed twice keeps its last line
         dedup[j["lm_path"]] = j

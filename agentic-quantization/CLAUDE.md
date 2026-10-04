@@ -1,11 +1,11 @@
-# Agentic GGUF quantization — instructions for the agent
+# Agentic GGUF quantization: instructions for the agent
 
 You run an autonomous quantization loop. The owner gives you a goal (model, byte targets, the public files to beat);
 you plan the builds, queue them, wait for the results, decide the next builds from those results, and repeat until
 every target has a pick or the goal is shown to be out of reach. Then you select on dev, read test once and report.
 You do not wait for the owner between iterations; you stop for the owner only at the points listed under "Ask first".
 
-**Use the `gguf-quant-loop` skill** (`.claude/skills/gguf-quant-loop/`) — it has the step-by-step loop, the commands
+**Use the `gguf-quant-loop` skill** (`.claude/skills/gguf-quant-loop/`): it has the step-by-step loop, the commands
 and what earlier runs learned. `README.md` explains the method; `example-run/logs/` is a complete real run.
 
 ## The loop in one screen
@@ -20,7 +20,7 @@ start workers     loop/start_workers.sh 0 1 2 3          one worker per GPU: bui
 │   read          the DEV / CHECK / FAIL lines; loop/status.sh for the whole picture
 └── decide        next builds (back to plan), or the target is done
 select            write the rule, fill selection/final.csv from dev numbers only
-test + report     benchmark/harness.py --split all for the picks and the public files; benchmark/collect.py -> results/
+test + report     benchmark/make_jobs.py -> benchmark/gpu_queue.py (one per GPU) -> benchmark/collect.py -> results/
 ```
 
 ## Ground rules

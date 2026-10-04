@@ -1,29 +1,63 @@
-# Benchmark harness (4090 server)
+# Benchmark harness
 
-One harness, one llama.cpp build, the same inputs for every GGUF. Shared protocol: the task brief.
+One harness, one llama.cpp build, the same inputs for every GGUF. Protocol: this file (pinned facts, data, metrics).
 
-## Run
+## Run one file
 
 ```bash
-# dev metrics for one file (prompt tuning, A100 dev checks)
+source loop/env.sh                                          # from agentic-quantization/
+# dev metrics for one file (prompt tuning, the loop's dev check)
 python benchmark/harness.py run --model Qwen3.5-2B --lm X.gguf --mmproj mmproj-Qwen3.5-2B-Q8_0.gguf \
     --prompt protocol/prompt_v1.txt --split dev --gpu 1
 # full run: dev (tau) + test, scored against the BF16 reference rows
-python benchmark/harness.py run ... --split all --ref /work/runs/<bf16 tag>/images.csv
+python benchmark/harness.py run ... --split all --ref $HN04B_RUNS/<bf16 tag>/images.csv
 python benchmark/harness.py cpu ...                         # CPU proxy, -ngl 0, 4 threads, 50 test images
 python benchmark/harness.py textkld --bf16 BF16.gguf --lm X.gguf --gpu 0
 python benchmark/harness.py score --run-dir <run> --ref <bf16 images.csv>   # rescore only
 ```
 
-Env: `LLAMA_CPP_DIR` (llama.cpp checkout with `build/bin`), `BRACOL_ROOT` (folder with `dataset.csv` and
-`images/`), `HN04B_CACHE` (preprocessed 512 px JPEGs), `HN04B_RUNS` (output root). Needs
-`pillow numpy requests`. On the 4090 server everything runs in container `hn04b-llama`, where physical
-GPUs 6 and 7 are `--gpu 0` and `--gpu 1`.
+Env (`loop/env.example.sh`): `LLAMA_CPP_DIR` (llama.cpp checkout with `build/bin`), `BRACOL_ROOT` (folder with
+`dataset.csv` and `images/`), `HN04B_CACHE` (preprocessed 512 px JPEGs), `HN04B_RUNS` (output root), `WIKITEXT`,
+`HN04B_SERVER_EXTRA` (extra `llama-server` flags). Python packages: `../requirements.txt`. `--gpu N` sets
+`CUDA_VISIBLE_DEVICES`.
 
 Outputs per run (`<runs>/<tag>/`): `images.csv` (path, image sha256, split, label, `p_A`..`p_F`,
 argmax over A to F, argmax over A to E, raw letter mass, sampled letter), `metrics.json` (per split),
 `meta.json` (file sizes and SHA-256s, llama.cpp commit, harness commit, prompt and template SHA-256,
 probability mode, s/img, bpw), `server.log`.
+
+## Full benchmark (every file, as in `../results/`)
+
+```bash
+python benchmark/fetch_public.py $HN04B_PUBLIC data/public_gguf_log.csv     # public GGUFs (<= 1 GB) + log
+# ours: every selection/files.csv `file` path (<model>/<name>.gguf) under one folder, here $WORK/eval, including
+#       <model>/<model>-BF16.gguf and <model>/mmproj-<model>-Q8_0.gguf (or fetch_ours.py from a model repo);
+#       make_jobs.py turns only the bf16 / ours-general / ours-task rows into jobs
+python benchmark/make_jobs.py --a100-dir $WORK/eval --public-dir $HN04B_PUBLIC --out $WORK/jobs.csv
+python benchmark/gpu_queue.py --models Qwen3.5-2B,Qwen3.5-0.8B --gpu 0 --port 8090 \
+    --prompt protocol/prompt_v1.txt --jobs $WORK/jobs.csv --a100-dir $WORK/eval          # one per GPU; add
+                                                                                         # --dataset jmuben for JMuBEN
+python benchmark/cpu_queue.py --model Qwen3.5-2B --cores 0-3 --port 8190 --prompt protocol/prompt_v1.txt \
+    --jobs $WORK/jobs.csv --mmproj $WORK/eval/Qwen3.5-2B/mmproj-Qwen3.5-2B-Q8_0.gguf     # optional CPU proxy
+touch $HN04B_RUNS/STOP                                      # queues exit when nothing runnable is left
+python benchmark/collect.py --prompt prompt_v1 --jobs $WORK/jobs.csv --out results/
+```
+
+Run tags are `<model>__<source>__<file stem>__<prompt stem>`; `collect.py` only reads runs named that way, so use the
+queues (or pass the same `--tag` to `harness.py run`).
+
+| Script | What |
+|---|---|
+| `harness.py` | one file: run, CPU proxy, text KLD, rescore |
+| `queue_common.py` | run-tag naming and env defaults shared by the queues |
+| `make_manifest.py`, `make_manifest_jmuben.py` | `../manifest.csv` (BRACOL split), `../manifest_jmuben.csv` (JMuBEN test set) |
+| `fetch_public.py`, `rebuild_public_log.py` | download the public GGUFs; rebuild `../data/public_gguf_log.csv` from a download folder |
+| `fetch_ours.py` | poll `files.csv`, download each listed file from a model repo, check SHA-256, rebuild the jobs list |
+| `make_jobs.py` | jobs list: BF16, ours (`files.csv`), public (log) |
+| `gpu_queue.py`, `cpu_queue.py` | shared-list workers: GPU (`run --split all` + text KLD), CPU proxy |
+| `collect.py` | every run of one prompt -> `../results/` (csv, charts, `summary.md`) |
+| `pairs.py` | quick side-by-side of ours vs the Unsloth file of the same name |
+| `general_bench.py`, `general_bench_sys.py`, `general_collect.py` | MMStar / AI2D / MMLU-Redux, the same with a one-letter system line (control), summary |
 
 ## Pinned facts
 
@@ -43,7 +77,7 @@ probability mode, s/img, bpw), `server.log`.
   The phone app should read the letters the same way and renormalise.
 - A to F are single tokens for both models (`/tokenize` check, stored in `meta.json`).
 - Several GPU workers (`benchmark/gpu_queue.py`, up to three per GPU) share one job list. Results do not depend on
-  which GPU or how many workers: the same file gave bit-identical probabilities on physical GPUs 6 and 7
+  which GPU or how many workers: the same file gave bit-identical probabilities on two different GPUs
   (BF16 2B, 1,685 of 1,685 rows) and when rerun under six concurrent workers (Unsloth UD-IQ2_M 2B, 1,685 of 1,685).
 - `benchmark/collect.py` rescores every run from its per-image file, so every number in `results/` comes from one
   code version.
@@ -73,6 +107,18 @@ doi:10.17632/yy2k5y8mxg.1. CC BY 4.0. Leaf-level set (`leaf/dataset.csv`, `leaf/
 - Split: per class, sorted by SHA-256 of file bytes, first floor(25%) dev, rest test
   (`benchmark/make_manifest.py`). 419 dev, 1,266 test.
 - One byte-identical pair (`images/813.jpg`, `images/1022.jpg`, both B, both test) is kept as two rows.
+
+```bash
+hf download luisangelico/bracol --repo-type dataset --revision 66178a06febde553e2c9d6f4d90dfc462e018268 \
+    --local-dir $BRACOL_ROOT                              # dataset.csv + images/, the paths of ../manifest.csv
+```
+`../manifest.csv` records each image's SHA-256; the harness caches the 512 px copy under that name (`$HN04B_CACHE/<sha256>.jpg`).
+
+## Data: JMuBEN (optional second test set)
+
+JMuBEN and JMuBEN2 (Jepkoech et al. 2021, Mendeley Data doi:10.17632/t2r6rszp5c.1 and doi:10.17632/tgv3zb82nd.1, CC BY 4.0).
+Extract both archives into `$JMUBEN_ROOT`; `make_manifest_jmuben.py` documents the test-set rule (`../manifest_jmuben.csv`,
+2,184 images) and `gpu_queue.py --dataset jmuben` runs it.
 
 ## Metric definitions (as implemented in `harness.py`)
 

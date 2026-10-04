@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# usage: stop_workers.sh [--now] — default: each worker exits after its current job (STOP file).
+# usage: stop_workers.sh [--now]: by default: each worker exits after its current job (STOP file).
 # --now: also kill the workers by their recorded PIDs (a running build is lost).
 HERE=$(cd "$(dirname "$0")" && pwd); source "$HERE/env.sh"; touch $WORK/STOP
 if [ "${1:-}" = "--now" ] && [ -f $WORK/workers.pid ]; then

@@ -13,7 +13,7 @@ enough to start the loop; later requests only steer it.
 
 > The 0.8B model matters too: add its 338 MB target to the loop, after the 2B targets.
 
-> Text KLD is better than Unsloth but dev F1 is worse. Find out why before queuing anything else — design the
+> Text KLD is better than Unsloth but dev F1 is worse. Find out why before queuing anything else: design the
 > cheapest experiment that separates the explanations.
 
 > Stop at 12:45. Write the selection rule now and fill final.csv from dev.

@@ -1,5 +1,9 @@
 import os, re
 
+# Defaults follow loop/env.example.sh; set the environment variables to override.
+WORK = os.environ.get("WORK", "work")
+RUNS = os.environ.get("HN04B_RUNS", os.path.join(WORK, "runs"))
+
 
 def slug(s):
     return re.sub(r"[^A-Za-z0-9._-]+", "_", s)

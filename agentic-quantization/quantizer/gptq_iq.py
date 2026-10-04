@@ -6,7 +6,7 @@ Per linear: H = X^T X from calibration activations of the (already-quantised) up
 rounded with llama.cpp's own quantiser (libggml, imatrix = diag H) and the joint block error is propagated to the
 remaining columns with the exact block-OBS update  W_R -= (W_B - Q_B) U_BB^{-1} U_BR,  U = chol(H^{-1}) upper.
 Output: the template GGUF with quantised tensors' bytes replaced (types, order, bytes identical)."""
-import argparse, glob, json, math, os, sys, time
+import argparse, json, math, os, sys, time
 import numpy as np, torch, gguf
 from concurrent.futures import ThreadPoolExecutor
 from gguf import GGUFReader, GGUFWriter
@@ -128,7 +128,7 @@ def main():
         print(f"image calibration: {len(img)} dev images (split=dev only), {sum(h.shape[1] for h, _, _ in img)} tokens, prompt {a.prompt_file}", flush=True)
     layers[0] = layers[0].m
     if a.offload_layers: lm.layers.to("cpu"); torch.cuda.empty_cache()
-    hs = lm.embed_tokens(data.to(dev)).to(torch.bfloat16)          # [n, L, 5120]
+    hs = lm.embed_tokens(data.to(dev)).to(torch.bfloat16)          # [n, L, hidden]
     def layer_kwargs(b):
         pe = tuple(p[..., :b, :, :] if p.dim() == 4 else p[:b] for p in pe_full) if isinstance(pe_full, tuple) else pe_full
         return dict(position_embeddings=pe, attention_mask=None, position_ids=(pid[:b] if pid is not None else None))

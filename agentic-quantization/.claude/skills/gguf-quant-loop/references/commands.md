@@ -37,10 +37,15 @@ types. Move order (up): full-attention q/k/v/o, ffn_down, ffn_gate, ffn_up, line
 
 | Variant | EXTRA |
 |---|---|
-| ours-general | `--tied-embd-gptq --calib-images $WORK/coco/generic_manifest.csv --image-dir $WORK/coco/gen512 --prompt-file $WORK/coco/prompt_generic_mcq.txt` |
+| ours-general, `general2` | `--tied-embd-gptq --calib-images $WORK/coco/generic_manifest.csv --image-dir $WORK/coco/gen512 --prompt-file <generic captioning prompt>` |
+| ours-general, `general3` | `--tied-embd-gptq --calib-images $WORK/coco/generic_manifest.csv --image-dir $WORK/coco/gen512 --prompt-file $WORK/coco/prompt_generic_mcq.txt` |
 | ours-task | `--tied-embd-gptq --calib-images manifest.csv --image-dir $WORK/bracol/dev512 --prompt-file protocol/prompt_v1.txt` |
 
-`gptq_iq.py` reads only `split == dev` rows of the manifest. NSEQ 128 × seqlen 2048 of `$CALIB_TEXT` is the default.
+Relative paths resolve against `agentic-quantization/` (`loop/build.sh` runs there). The COCO files are the example run's
+private assets (`README.md`, "Reproduce"): a manifest in the `manifest.csv` format with every row `split=dev`, the
+512 px JPEGs by file name, and prompt files in the protocol format. Make your own the same way.
+
+`gptq_iq.py` reads only `split == dev` rows of the manifest and opens each image by its file name in `--image-dir`. NSEQ 128 × seqlen 2048 of `$CALIB_TEXT` is the default.
 A100: 2B 13–15 min and ~10 GB per build, 0.8B 5–11 min. Add `--offload-layers` on small GPUs.
 
 ## Files and numbers
@@ -53,7 +58,14 @@ python $LLAMA_CPP_DIR/gguf-py/gguf/scripts/gguf_dump.py FILE.gguf | head -40   #
 ## Test and collect (after selection only)
 
 ```bash
-python benchmark/harness.py run --model Qwen3.5-2B --lm FILE --mmproj $WORK/gguf/mmproj-Qwen3.5-2B-Q8_0.gguf \
-    --prompt protocol/prompt_v1.txt --split all --ref $HN04B_RUNS/bf16-2B-all/images.csv --gpu 0
-python benchmark/collect.py --prompt prompt_v1 --jobs jobs.csv --out results/   # see benchmark/README.md
+# EVAL = one folder with every selection/files.csv path: <model>/<name>.gguf, <model>/<model>-BF16.gguf,
+#        <model>/mmproj-<model>-Q8_0.gguf (links to $WORK/gguf/ours/TAG.gguf etc. are fine);
+#        make_jobs.py turns only the bf16 / ours-general / ours-task rows into jobs
+python benchmark/make_jobs.py --a100-dir $EVAL --public-dir $HN04B_PUBLIC --out $WORK/jobs.csv
+python benchmark/gpu_queue.py --models Qwen3.5-2B --gpu 0 --port 8090 --prompt protocol/prompt_v1.txt \
+    --jobs $WORK/jobs.csv --a100-dir $EVAL                  # one per GPU; BF16 runs first, the rest wait for it
+touch $HN04B_RUNS/STOP                                      # queues exit when nothing runnable is left
+python benchmark/collect.py --prompt prompt_v1 --jobs $WORK/jobs.csv --out results/
 ```
+`collect.py` reads only runs tagged `<model>__<source>__<file stem>__<prompt stem>`, which the queues write. Details,
+the CPU proxy and JMuBEN: `benchmark/README.md`.

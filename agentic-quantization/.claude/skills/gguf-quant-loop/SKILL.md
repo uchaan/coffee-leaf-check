@@ -1,6 +1,6 @@
 ---
 name: gguf-quant-loop
-description: Run the autonomous GGUF quantization loop for a small vision-language model (Qwen3.5-2B / 0.8B here) with llama.cpp — set up, plan per-tensor types for byte targets, queue GPTQ-IQ builds, wait for the automatic check and dev run of each build, decide the next builds from the results, then select on dev, read test once and report against public GGUF files at matched bytes. Use when asked to quantize a model to GGUF, beat a public GGUF at a size, build files for a byte budget, continue or resume the loop, or read build / dev results.
+description: Run the autonomous GGUF quantization loop for a small vision-language model (Qwen3.5-2B / 0.8B here) with llama.cpp: set up, plan per-tensor types for byte targets, queue GPTQ-IQ builds, wait for the automatic check and dev run of each build, decide the next builds from the results, then select on dev, read test once and report against public GGUF files at matched bytes. Use when asked to quantize a model to GGUF, beat a public GGUF at a size, build files for a byte budget, continue or resume the loop, or read build / dev results.
 ---
 
 # gguf-quant-loop
@@ -26,8 +26,9 @@ If any of these is missing and you cannot infer it from the request, ask once, t
 4. BF16 dev reference: `benchmark/harness.py run --model M --lm BF16.gguf --mmproj ... --prompt protocol/prompt_v1.txt
    --split dev --tag bf16-2B-dev` (the dev runs score agreement against it).
 5. Text-KLD base: `llama-perplexity ... --kl-divergence-base $WORK/kld-base-M-wt2-512x40.kld` (see `loop/check.sh`).
-6. Calibration: `$CALIB_TEXT` (FineWeb-Edu + C4), generic images (COCO) for ours-general, BRACOL **dev** images
-   (512 px, JPEG q90) for ours-task.
+6. Calibration: `$CALIB_TEXT` (FineWeb-Edu + C4), generic images (COCO) with a generic prompt for ours-general,
+   BRACOL **dev** images (512 px, JPEG q90, by file name in `$WORK/bracol/dev512`; `../fine-tuning/data/prep_images.py bracol`)
+   for ours-task. The example run's text and COCO assets are not published (`README.md`, "Reproduce").
 7. `loop/start_workers.sh <gpus>`; then `loop/wait_event.sh` once to set the cursor.
 
 ## 2. The iteration
@@ -40,8 +41,9 @@ the first round; later rounds change *one* thing relative to the best so far.
 ("if ours-general dev F1 at 637 MB < Unsloth's at 768 MB, try …; else …").
 
 **Queue.** `loop/enqueue.sh TAG TEMPLATE 128 "EXTRA"`; one job per (template, variant). Variants:
-- ours-general: `--tied-embd-gptq --calib-images <generic manifest> --image-dir <coco512> --prompt-file <generic prompt>`
-- ours-task: `--tied-embd-gptq --calib-images manifest.csv --image-dir <bracol dev512> --prompt-file protocol/prompt_v1.txt`
+- ours-general (`general2` / `general3` in the tag): `--tied-embd-gptq --calib-images <generic manifest> --image-dir <coco512> --prompt-file <generic prompt>`
+- ours-task: `--tied-embd-gptq --calib-images manifest.csv --image-dir $WORK/bracol/dev512 --prompt-file protocol/prompt_v1.txt`
+Relative paths in EXTRA resolve against `agentic-quantization/` (`loop/build.sh` runs there).
 Queue enough that every GPU has a next job; order by what decides the most.
 
 **Wait.** Run `loop/wait_event.sh` **in the background** (Claude Code: `run_in_background: true`) and end your turn's
@@ -54,7 +56,7 @@ For `FAIL`: open `logs/build-TAG.log`, fix, re-queue (count it in the log). `loo
 **Decide** (write the decision in `LOG.md` with the numbers):
 - a target is *done* when its best ours-general file beats the public comparator on dev by more than noise, or when
   two rounds in a row brought no gain → mark it and stop building for it;
-- otherwise plan the next round for it (back to Plan) — change the factor the evidence points at (see lessons);
+- otherwise plan the next round for it (back to Plan): change the factor the evidence points at (see lessons);
 - when every target is done or the deadline is close, go to Selection. Never let the queue run dry while targets
   are open.
 
@@ -66,9 +68,11 @@ SHA-256 (`quantizer/fileinfo.py`). Only then run test.
 
 ## 4. Test and report
 
-`benchmark/harness.py run --split all --ref <BF16 images.csv>` for the picks and every public file in the size range,
-then `benchmark/collect.py` → `results/summary.md` (paired bootstrap intervals at matched bytes). Report: conclusion
-first, one table, the wins and the losses. Stop the workers (`loop/stop_workers.sh`).
+Stop the build workers (`loop/stop_workers.sh`). Put the picks, every other built file, BF16 and the Q8_0 mmproj under
+one folder at their `selection/files.csv` paths (`<model>/<name>.gguf`), then `benchmark/make_jobs.py` → one
+`benchmark/gpu_queue.py` per GPU (`--split all` against the BF16 rows) → `benchmark/collect.py` → `results/summary.md`
+(paired bootstrap intervals at matched bytes). Commands: `references/commands.md`. `collect.py` reads only runs tagged by
+the queues, so do not run test with `harness.py` directly. Report: conclusion first, one table, the wins and the losses.
 
 ## Resuming
 

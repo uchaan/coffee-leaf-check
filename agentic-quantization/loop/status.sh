@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# usage: status.sh — queue, workers, GPUs and the last events, in one screen
+# usage: status.sh [N]: queue, workers, GPUs and the last events, in one screen
 HERE=$(cd "$(dirname "$0")" && pwd); source "$HERE/env.sh"
 echo "queue: $(grep -c . $WORK/queue.txt 2>/dev/null || echo 0) jobs"; head -n 5 $WORK/queue.txt 2>/dev/null | cut -d'|' -f1 | sed 's/^/  next: /'
 [ -f $WORK/workers.pid ] && while read g pid; do kill -0 $pid 2>/dev/null && s=alive || s=dead; echo "worker gpu=$g pid=$pid $s"; done < $WORK/workers.pid

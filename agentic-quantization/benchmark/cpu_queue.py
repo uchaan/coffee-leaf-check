@@ -8,7 +8,7 @@ import argparse, csv, os, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from queue_common import tag_of  # noqa: E402
+from queue_common import RUNS, tag_of  # noqa: E402
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     ap.add_argument("--model", required=True); ap.add_argument("--cores", required=True)
     ap.add_argument("--port", required=True); ap.add_argument("--prompt", required=True)
     ap.add_argument("--jobs", required=True); ap.add_argument("--mmproj", required=True)
-    ap.add_argument("--runs", default=os.environ.get("HN04B_RUNS", "/work/runs"))
+    ap.add_argument("--runs", default=RUNS)
     a = ap.parse_args()
     pname = os.path.basename(a.prompt).replace(".txt", "")
     while True:

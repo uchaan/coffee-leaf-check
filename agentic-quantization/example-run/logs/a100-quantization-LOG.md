@@ -1,11 +1,15 @@
-# A100 server — quantization log, Hack-Nation 04B
+# A100 server: quantization log, Hack-Nation 04B
 
-Model files went to a private model repo (not public). Every file: a line in `../selection/files.csv`.
+> Editor's note (added after the run): the owner's quotes are translated from Korean. Model files and calibration assets
+> were kept in a private Hugging Face repo during the run and are not published. The fine-tuning code is now in
+> `../../../fine-tuning/` and the final numbers are in `../../../RESULTS.md`.
+
+Model files went to a private model repo (not public). Every file: a line in `../../selection/files.csv`.
 
 ## Setup (2026-10-04)
 - llama.cpp: `9a7570587ce908b0073a0458877205b80627f393` (2026-09-07, "convert : write explicit recurrent_layers for Qwen3-Next / Qwen3.5"),
   CUDA build, arch 80 (A100). The 4090 server should build the same commit.
-- Pipeline: GPTQ-IQ (`quantizer/gptq_iq.py`, with layer / lm_head offload). It loads `Qwen3_5ForConditionalGeneration` — the
+- Pipeline: GPTQ-IQ (`quantizer/gptq_iq.py`, with layer / lm_head offload). It loads `Qwen3_5ForConditionalGeneration`, the
   class of both Qwen3.5-2B and Qwen3.5-0.8B. The linear-attention head layout (key heads, value heads, head dim) is read from the model
   config (both small models: 16 / 16 / 128).
 - Base models: `Qwen/Qwen3.5-2B`, `Qwen/Qwen3.5-0.8B` (architectures `Qwen3_5ForConditionalGeneration`, tied embeddings, 24 layers =
@@ -20,7 +24,7 @@ Model files went to a private model repo (not public). Every file: a line in `..
 | Qwen3.5-0.8B/Qwen3.5-0.8B-BF16.gguf | 1,557,662,624 | 3fdaa1085c1bda18d78335e247151875790c4397cee1a1594b9f7c0339f3e85e |
 | **Qwen3.5-0.8B/mmproj-Qwen3.5-0.8B-Q8_0.gguf (canonical)** | 113,564,384 | **aae6e712f47e44d4f18d6c2f4eb0007ea61f19dd72fd4ef27dff2aaa1b1a81bb** |
 | Qwen3.5-0.8B/mmproj-Qwen3.5-0.8B-F16.gguf | 204,987,104 | 1dc1351c82e41b48edb55fd6ddfa7ca60fb5a16b3d5abf3ce7054880dd022847 |
-Notes for the 4090 server: our BF16 conversion includes the MTP layer (blk.24, 335 tensors; Unsloth's GGUFs have 320, no MTP) — MTP is
+Notes for the 4090 server: our BF16 conversion includes the MTP layer (blk.24, 335 tensors; Unsloth's GGUFs have 320, no MTP); MTP is
 not used by normal decoding. Sanity check on the A100: 2B BF16 + the canonical Q8_0 mmproj answer "green and orange" for a synthetic
 green image with an orange disc (llama-mtmd-cli). `llama-server` at this commit has `--chat-template-kwargs` and `--reasoning-budget`;
 `llama-mtmd-cli` has neither. 1 GB package budgets: 2B LM < 638,481,344 B; 0.8B LM < 886,435,616 B (with the canonical Q8_0 mmproj).
@@ -28,7 +32,7 @@ green image with an orange disc (llama-mtmd-cli). `llama-server` at this commit 
 ## Frozen prompt = v0 (owner decision, 2026-10-04 04:3x KST)
 The owner's candidate v1 (agronomist wording; kept as `protocol/prompt_v1_rejected_2026-10-04.txt`) was frozen and measured
 on BRACOL **dev** only: BF16 Qwen3.5-2B forced_macro_f1 v0 0.6462 (A100) / 0.6527 (4090) vs v1 0.3238 / 0.3230; the model never answers A
-or E with v1; 0.8B 0.36 → 0.16 (4090). Owner's choice: "v0로 되돌림" → `protocol/prompt_v1.txt` now holds the v0
+or E with v1; 0.8B 0.36 → 0.16 (4090). Owner's choice: "revert to v0" → `protocol/prompt_v1.txt` now holds the v0
 text byte for byte (frozen benchmark prompt). Runs made with the rejected text are void for the benchmark. ours-task calibrates with this
 file, so the ours-task builds made with the rejected text are discarded and rebuilt.
 
@@ -48,7 +52,7 @@ file, so the ours-task builds made with the rejected text are discarded and rebu
 - **Selection rule:** for each (model, target) the allocation is chosen on the BRACOL dev numbers of the **ours-general** files (no BRACOL
   data in their calibration, so not in-sample); ours-task uses the same allocation. `selection/final.csv` lists one ours-general and one
   ours-task file per (model, target) and is written before any test number is seen.
-- General quality beyond BRACOL (owner's request): `benchmark/general_bench.py` — MMStar (1,500), AI2D test (1,000 by SHA-256), MMLU-Redux 2.0
+- General quality beyond BRACOL (owner's request): `benchmark/general_bench.py`: MMStar (1,500), AI2D test (1,000 by SHA-256), MMLU-Redux 2.0
   (5,330 items with error_type ok), one-letter multiple choice scored like the harness (pre50 letter probabilities, thinking off).
 
 ## final.csv selection rule, made precise (2026-10-04 06:5x KST, before any test number and before the v2b results)
@@ -60,7 +64,7 @@ General benchmarks (MMStar / AI2D / MMLU-Redux, `benchmark/general_bench.py`) an
 matched Unsloth files; they do not enter the selection.
 
 ## Low-end search (2026-10-04 10:2x KST, registered before any of its builds finished)
-- Scope (owner, 10:0x): UD-IQ2_XXS size and below only — 2B 768 / 700 / 637 MB (1 GB package), 0.8B 338 / 310 / 290 MB. Owner, 10:1x:
+- Scope (owner, 10:0x): UD-IQ2_XXS size and below only: 2B 768 / 700 / 637 MB (1 GB package), 0.8B 338 / 310 / 290 MB. Owner, 10:1x:
   screen with a benchmark → the screen is BRACOL **dev** on real builds (forced_macro_f1, letter_kld as the low-noise second reading),
   i.e. the registered selection metric itself. The A100 builds on cards 0–6.
 - Split (owner, 10:2x: the 4090 now has six cards and should build and experiment too): A100 = 2B low end; 4090 = 0.8B low end end to
@@ -78,19 +82,20 @@ matched Unsloth files; they do not enter the selection.
   A100 reads the event log with FINAL lines filtered out until the freeze.
 
 ## Fine-tuning track (owner's change of scope, 2026-10-04 11:3x–14:0x KST)
-- Owner, verbatim (this session): "해커톤 규칙이란건 딱히 없고 그냥 내가 정한거라 유연하게 해도 됨" → option 2 "양자화 후 fine-tuning"; then
-  "양자화로 general task 에서 best 인 모델 뽑아내기 (Unsloth 를 압도하는) 그리고 나서 fine-tuning 으로 BRACOL 에 대해서 높은 점수",
-  "2B 모델로 픽스", "95프로까지 가보자", base choice "(A) 로 가야지" (task-1GBpkg-eQ2_K, package with adapter 1,011.9 MB, 1.2 % over
-  the 1 GB package rule the owner set), and "450MB 을 벤치마크 높게끔 조합 찾아볼순없나?".
-- Method (A100 only; the fine-tuning code is not included in this repository): the LM linears + tied embedding of OUR GGUF are dequantised into the HF model (inverse of
+- Owner (this session, translated): "there are no hackathon rules as such, I set them, so this can be flexible" → option 2
+  "fine-tuning after quantization"; then "get the best model on general tasks by quantization (one that clearly beats Unsloth),
+  then a high BRACOL score by fine-tuning", "fix on the 2B model", "let's go for 95%", base choice "go with (A)"
+  (task-1GBpkg-eQ2_K, package with adapter 1,011.9 MB, 1.2 % over the 1 GB package rule the owner set), and "can we find a
+  combination that scores high on the benchmark at 450 MB?".
+- Method (A100 only; the fine-tuning code is now in `../../../fine-tuning/`): the LM linears + tied embedding of OUR GGUF are dequantised into the HF model (inverse of
   gptq_iq.py's layout; check: BF16 HF vs llama-server letter probabilities |Δ| ≤ 0.05), the base stays frozen, a LoRA adapter is trained
   (PEFT; rank 8/16 on q/k/v/o, gate/up/down, in_proj_qkv/z, out_proj; loss = CE over the six letters at the answer position, frozen
   prompt); optional: LoRA on the vision blocks + merger trained jointly and merged into the canonical Q8_0 mmproj (
   re-quantised Q8_0, same bytes). LM adapters are exported with llama.cpp `convert_lora_to_gguf.py` (Q8_0, 12.6 MB at rank 8) and served
   with `llama-server --lora` (harness unchanged; a wrapper adds the flag).
-- Data: BRACOL **dev** only — train 337 (int(sha256,16) % 5 != 0), epoch choice on the other 82; `--all-dev` runs train on all 419 with a
+- Data: BRACOL **dev** only: train 337 (int(sha256,16) % 5 != 0), epoch choice on the other 82; `--all-dev` runs train on all 419 with a
   fixed epoch count. BRACOL **test** is never used for training, epoch choice or configuration choice. Some runs add JMuBEN distinct
-  images (4090 dedup, 3,756; subsets of 1,284 / 2,184) — for those adapters JMuBEN numbers are training-set numbers.
+  images (4090 dedup, 3,756; subsets of 1,284 / 2,184); for those adapters JMuBEN numbers are training-set numbers.
 - Results so far (BRACOL test n=1,266, A100; 4090 reproduces within 0.01): 637 MB general3 + r8 0.860 acc / 0.816 F1; 637 MB task + r8
   0.866 / 0.839; 625 MB + r8 0.877 / 0.852 (package 999.3 MB); 450 MB + r8 0.887 / 0.864 (823.7 MB); Unsloth UD-IQ2_XXS + same r8
   recipe 0.859 / 0.837 (1,142.4 MB); 450 MB + r16 + aug + JMuBEN-2184 0.912 / 0.887; 450 MB + vision LoRA + aug + JMuBEN-1284 0.908 /

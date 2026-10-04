@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Side-by-side dev (and test) numbers for each ours file and its size-matched public counterpart.
-  python benchmark/pairs.py --prompt prompt_v1 --jobs /work/jobs.csv --model Qwen3.5-2B
+  python benchmark/pairs.py --prompt prompt_v1 --jobs $WORK/jobs.csv --model Qwen3.5-2B
 """
 import argparse, csv, json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from queue_common import tag_of  # noqa: E402
+from queue_common import RUNS, tag_of  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--prompt", required=True); ap.add_argument("--jobs", required=True)
-ap.add_argument("--model", required=True); ap.add_argument("--runs", default="/work/runs")
+ap.add_argument("--model", required=True); ap.add_argument("--runs", default=RUNS)
 a = ap.parse_args()
 jobs = [j for j in csv.DictReader(open(a.jobs)) if j["model"] == a.model]
 

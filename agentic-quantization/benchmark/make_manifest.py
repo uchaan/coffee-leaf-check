@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build hacknation-04b/manifest.csv from the BRACOL leaf dataset (Shared protocol).
+"""Build agentic-quantization/manifest.csv from the BRACOL leaf dataset (protocol: benchmark/README.md).
 
 BRACOL root = the folder holding dataset.csv and images/ (leaf-level set).
 Per class: sort images by SHA-256 of file bytes; first floor(25%) -> dev, rest -> test.

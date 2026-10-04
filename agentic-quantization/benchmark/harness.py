@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Hack-Nation 04B coffee-leaf benchmark harness (Shared protocol).
+"""Hack-Nation 04B coffee-leaf benchmark harness (protocol: benchmark/README.md).
 
 One language-model GGUF + one mmproj GGUF + one prompt file -> per-image letter
 probabilities on a manifest split, through llama-server, plus the metrics row.
 
   # dev metrics for one file (what the A100 server and prompt tuning use)
   python benchmark/harness.py run --model Qwen3.5-2B --lm X.gguf --mmproj mmproj.gguf \
-      --prompt protocol/prompt_v0.txt --split dev --gpu 1
+      --prompt protocol/prompt_v1.txt --split dev --gpu 1
 
   # full run (dev for tau + test), scored against the BF16 reference rows
   python benchmark/harness.py run ... --split all --ref runs/<bf16 tag>/images.csv
@@ -20,8 +20,9 @@ probabilities on a manifest split, through llama-server, plus the metrics row.
   # rescore an existing run (e.g. once the BF16 reference exists)
   python benchmark/harness.py score --run-dir runs/<tag> --ref runs/<bf16 tag>/images.csv
 
-Environment: LLAMA_CPP_DIR (default /work/llama.cpp; binaries in build/bin),
-BRACOL_ROOT (folder with images/), HN04B_CACHE (preprocessed images).
+Environment (defaults as in loop/env.example.sh): LLAMA_CPP_DIR (default ./llama.cpp; binaries in build/bin),
+WORK (default ./work), BRACOL_ROOT (folder with dataset.csv and images/), HN04B_CACHE (preprocessed images),
+HN04B_RUNS (output root), WIKITEXT (text-KLD text), HN04B_SERVER_EXTRA (extra llama-server flags for GPU runs).
 """
 import argparse, base64, csv, hashlib, io, json, os, re, signal, subprocess, sys, time
 
@@ -30,11 +31,12 @@ import requests
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)  # hacknation-04b/
+ROOT = os.path.dirname(HERE)  # agentic-quantization/
 LETTERS = "ABCDEF"
 FORCED = "ABCDE"
 COARSE = {"A": "A", "B": "B", "C": "X", "D": "X", "E": "X"}
-LLAMA_DIR = os.environ.get("LLAMA_CPP_DIR", "/work/llama.cpp")
+LLAMA_DIR = os.environ.get("LLAMA_CPP_DIR", "llama.cpp")
+WORK = os.environ.get("WORK", "work")  # defaults below follow loop/env.example.sh
 HARNESS_VERSION = "1"
 
 
@@ -520,9 +522,9 @@ def main():
         p.add_argument("--prompt", required=True)
         p.add_argument("--chat-template-file", default=None, help="default: protocol/chat_templates/<model>.jinja")
         p.add_argument("--manifest", default=os.path.join(ROOT, "manifest.csv"))
-        p.add_argument("--data-root", default=os.environ.get("BRACOL_ROOT", "/work/data/bracol_hf"))
-        p.add_argument("--cache", default=os.environ.get("HN04B_CACHE", "/work/data/cache512"))
-        p.add_argument("--out-root", default=os.environ.get("HN04B_RUNS", "/work/runs"))
+        p.add_argument("--data-root", default=os.environ.get("BRACOL_ROOT", os.path.join(WORK, "bracol", "raw")))
+        p.add_argument("--cache", default=os.environ.get("HN04B_CACHE", os.path.join(WORK, "bracol", "cache512")))
+        p.add_argument("--out-root", default=os.environ.get("HN04B_RUNS", os.path.join(WORK, "runs")))
         p.add_argument("--tag", default=None)
         p.add_argument("--port", type=int, default=8090)
         p.add_argument("--prob-mode", choices=["pre50", "post"], default="pre50",
@@ -549,7 +551,7 @@ def main():
 
     p = sub.add_parser("textkld")
     p.add_argument("--bf16", required=True); p.add_argument("--lm", required=True)
-    p.add_argument("--text", default=os.environ.get("WIKITEXT", "/work/data/wikitext-2-raw/wiki.test.raw"))
+    p.add_argument("--text", default=os.environ.get("WIKITEXT", os.path.join(WORK, "calib", "wikitext2_test.txt")))
     p.add_argument("--base", default=None); p.add_argument("--gpu", default=None)
     p.add_argument("--out", default=None); p.add_argument("--log", default=None)
     p.set_defaults(fn=cmd_textkld)
