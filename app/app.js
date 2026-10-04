@@ -4,7 +4,9 @@
 // cards.json (fixed, human-checked text) and pre-recorded audio, so the model cannot invent advice.
 
 // UI strings. Which languages are offered, and in what order, comes from config.json
-// ("languages"); the first is the default. DRAFT until native speakers check pt and sw.
+// ("languages"); the first is the default. The shipped config offers pt and en. The sw strings
+// (here, in ABOUT and in cards.json) are an unchecked draft, enabled by adding "sw" to
+// config.languages; native speakers have not checked pt or sw yet.
 const UI = {
   pt: {
     appName: "Folha de Café",
@@ -65,14 +67,15 @@ const UI = {
 const ABOUT = {
   pt: `<p><b>O que faz.</b> Analisa uma folha de café arábica e identifica cinco situações: saudável, ferrugem, cercosporiose, mancha de Phoma e bicho-mineiro. Funciona neste celular, sem internet.</p>
 <p><b>O que não faz.</b> Não recomenda produtos químicos nem doses. Quando não tem certeza, diz isso e guarda a foto para o técnico agrícola. Quem decide é uma pessoa.</p>
-<p><b>Limites.</b> Testado com fotos do BRACOL (Brasil) e do JMuBEN (Quênia): uma folha solta, quase sempre com fundo limpo. Não foi testado com folhas ainda no pé, outras variedades, outras doenças nem fotos da planta inteira.</p>
+<p><b>Limites.</b> Testado com fotos do BRACOL (Brasil: uma folha solta, fundo claro) e do JMuBEN (Quênia: close-ups tirados no pé). Não foi testado com fotos com solo, galhos ou outras folhas no quadro, outras variedades, outras doenças nem fotos da planta inteira.</p>
 <p><b>Precisão.</b> 90,8% no conjunto de teste do BRACOL (1.266 fotos). Em fotos de outro tipo, a precisão cai bastante.</p>
 <p class="small">Dados: BRACOL (Krohling, Esgario, Ventura) e JMuBEN (Jepkoech et al.), Mendeley Data, CC BY 4.0. Modelo base: Qwen3.5-2B, Apache 2.0, quantizado e ajustado pela equipe. Execução: llama.cpp (MIT). Voz: ElevenLabs, gravada antes e tocada sem internet.</p>`,
   en: `<p><b>What it does.</b> Checks one Arabica coffee leaf for five conditions: healthy, leaf rust, brown eye spot, Phoma, leaf miner. Runs on this phone with no internet.</p>
 <p><b>What it does not do.</b> It does not recommend chemicals or doses. When it is not sure, it says so and saves the photo for the extension officer. A person makes the final call.</p>
-<p><b>Limits.</b> Tested on BRACOL (Brazil) and JMuBEN (Kenya) photos: one loose leaf, mostly on a clean background. Not tested on leaves still on the plant, other varieties, other diseases, or whole trees.</p>
+<p><b>Limits.</b> Tested on BRACOL (Brazil: one picked leaf on a plain background) and JMuBEN (Kenya: close-ups taken on the plant) photos. Not tested on photos with soil, branches or other leaves in the frame, other varieties, other diseases, or whole trees.</p>
 <p><b>Accuracy.</b> 90.8% on the BRACOL test set (1,266 photos). On other kinds of photos it drops a lot.</p>
 <p class="small">Data: BRACOL (Krohling, Esgario, Ventura) and JMuBEN (Jepkoech et al.), Mendeley Data, CC BY 4.0. Base model: Qwen3.5-2B, Apache 2.0, quantized and fine-tuned by the team. Runtime: llama.cpp (MIT). Voice: ElevenLabs, recorded in advance and played offline.</p>`,
+  // sw: draft, not offered by default; Limits/Accuracy not yet updated to match pt and en.
   sw: `<p><b>Kinachofanya.</b> Hukagua jani moja la kahawa ya Arabika kwa hali tano: lenye afya, kutu, madoa ya jicho kahawia, Phoma, mchimba jani. Hufanya kazi kwenye simu hii bila mtandao.</p>
 <p><b>Kisichofanya.</b> Hakipendekezi dawa wala vipimo. Kisipokuwa na uhakika, husema hivyo na kuhifadhi picha kwa ajili ya afisa ugani. Uamuzi wa mwisho ni wa mtu.</p>
 <p><b>Mipaka.</b> Kimejaribiwa kwa picha za BRACOL kutoka Brazili: jani moja moja, mandharinyuma safi. Hakijajaribiwa kwa aina nyingine, nchi nyingine, magonjwa mengine, wala picha za mti mzima.</p>
@@ -122,8 +125,9 @@ async function boot() {
   startCamera();
 }
 
-// Package format (Youchan's prompt.txt): "### system", "### user", "### grammar" sections,
-// used word for word. The older "SYSTEM: ... USER (after the image): ..." draft format still parses.
+// Package format (agentic-quantization/protocol/prompt_v1.txt, copied as prompt.txt):
+// "### system", "### user", "### grammar" sections, used word for word.
+// A plain "SYSTEM: ... USER: ..." file is also accepted (no grammar).
 function parsePrompt(txt) {
   txt = txt.replace(/\r\n/g, "\n");
   if (/^### system/m.test(txt)) {

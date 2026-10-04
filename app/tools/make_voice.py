@@ -1,13 +1,15 @@
 """Pre-record the answer cards with ElevenLabs, once, while online.
 
-The app never calls ElevenLabs: the MP3s ship inside app/audio/ and play offline.
-Usage:  python3 tools/make_voice.py --dry-run          # show exactly what will be spoken
-        ELEVENLABS_API_KEY=... python3 tools/make_voice.py [--voice VOICE_ID] [--model eleven_v3] [--only sw/rust]
-Re-run after any change to app/cards.json (the Swahili must be checked first).
+The app never calls ElevenLabs: it plays the MP3s from app/audio/ offline, and falls back to
+the phone's own text-to-speech when a clip is missing. app/audio/ is generated, not in git.
+Usage (from app/):
+        python3 tools/make_voice.py --dry-run          # show exactly what will be spoken
+        ELEVENLABS_API_KEY=... python3 tools/make_voice.py [--voice VOICE_ID] [--model eleven_v3] [--only pt/rust]
+Re-run after any change to cards.json. Have a native speaker check the text before recording.
 """
 import argparse, datetime, json, os, pathlib, sys, urllib.request, urllib.error
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent / "app"
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # app/
 
 def say(card):
     # What the farmer hears: the name, what to do today, when to call the officer.
@@ -18,7 +20,7 @@ def main():
     ap.add_argument("--voice", default=os.environ.get("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM"))
     ap.add_argument("--model", default="eleven_v3")
     ap.add_argument("--langs", default="pt,en")
-    ap.add_argument("--only", help="one clip, e.g. sw/rust")
+    ap.add_argument("--only", help="one clip, e.g. pt/rust")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     cards = json.loads((ROOT / "cards.json").read_text())

@@ -4,7 +4,7 @@
   "mmproj_file": "models/hf/mmproj-Qwen3.5-2B-ours-coffee-Q8_0.gguf",
   "lora_file": "models/hf/Qwen3.5-2B-ours-coffee-lora-Q8_0.gguf",
   "tau": 0.5,
-  "tau_note": "placeholder until Youchan sends the final tau",
+  "tau_note": "0.5: fixed default, not tuned on dev for the final package",
   "very_likely": 0.8,
   "languages": [
     "pt",
