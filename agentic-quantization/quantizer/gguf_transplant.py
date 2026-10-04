@@ -2,8 +2,8 @@
 """Byte-level tensor transplant between two GGUF files of the same model (no re-quantisation).
 
 The output has BASE's metadata and tensor order; every tensor named in --take is copied (type and bytes) from DONOR
-instead. Used to build mixed-allocation hybrids from two quantised builds, e.g. an NP file on unsloth's 7.27 GB
-allocation (base) upgraded group by group with the tensors of an NP file on the 8.37 GB allocation (donor).
+instead. Used to build mixed-allocation hybrids from two quantised builds, e.g. a build on a smaller allocation
+(base) upgraded group by group with the tensors of a build on a larger allocation (donor).
 
 usage: gguf_transplant.py BASE DONOR OUT (--take NAME [NAME ...] | --take-file FILE) [--dry-run]
 """
