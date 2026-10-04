@@ -34,7 +34,7 @@ photo of one leaf (resized to 512 px)
 
 CPU check (4 threads, base model): 3.2 s per image, 1.7 GB peak memory.
 
-The phone app in [`app/`](app/) shows the answer letter and its fixed card. The explanation sentence and its translation are package capabilities ([`fine-tuning/explain_demo.py`](fine-tuning/explain_demo.py), [`fine-tuning/translate_pt.py`](fine-tuning/translate_pt.py)) and are not in the app yet.
+The phone app in [`app/`](app/) shows the answer letter and its fixed card. The explanation sentence and its translation are package capabilities ([`model/fine-tuning/explain_demo.py`](model/fine-tuning/explain_demo.py), [`model/fine-tuning/translate_pt.py`](model/fine-tuning/translate_pt.py)) and are not in the app yet.
 
 ## 2. Quantisation: smaller than the public files, and it still works
 

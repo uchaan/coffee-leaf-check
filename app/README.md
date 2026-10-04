@@ -9,7 +9,7 @@ airplane mode. No external scripts, fonts or styles.
 | `index.html`, `app.js` | camera → resize → request → letter probabilities → decision → answer card |
 | `config.json` | model, mmproj, LoRA, prompt path, tau, context, threads, languages. A model swap edits only this |
 | `cards.json` | the six answer cards (A–E + not sure). pt-BR and en are offered; sw is an unchecked draft. The model never writes card text |
-| `prompt.txt` | the package prompt, a copy of [`agentic-quantization/protocol/prompt_v1.txt`](../agentic-quantization/protocol/prompt_v1.txt) |
+| `prompt.txt` | the package prompt, a byte-identical copy of [`protocol/prompt_v1.txt`](../protocol/prompt_v1.txt) |
 | `run_phone.sh` | launcher (Termux or desktop); reads paths, `-c`, `-t` and port from `config.json` |
 | `tools/make_voice.py` | optional: records each card once with ElevenLabs into `audio/<lang>/<card>.mp3` |
 | `manifest.json`, `icon-*.png` | "Add to Home screen" → opens full screen without the address bar |
@@ -25,8 +25,8 @@ The weights are not in this repository. `run_phone.sh` expects the three package
     app/models/hf/mmproj-Qwen3.5-2B-ours-coffee-Q8_0.gguf     # 361.5 MB
     app/models/hf/Qwen3.5-2B-ours-coffee-lora-Q8_0.gguf       # 12.6 MB
 
-To rebuild them: the quantized model comes from [`agentic-quantization/`](../agentic-quantization/),
-the LoRA and vision projector from [`fine-tuning/`](../fine-tuning/) (`export_lora.py`). If you have
+To rebuild them: the quantized model comes from [`model/quantization/`](../model/quantization/),
+the LoRA and vision projector from [`model/fine-tuning/`](../model/fine-tuning/) (`export_lora.py`). If you have
 the package as a zip: `unzip <package>.zip -x '__MACOSX/*' '*.DS_Store' -d app/models/`.
 Other file names work too: edit `model_file`, `mmproj_file`, `lora_file` in `config.json`.
 
@@ -98,7 +98,7 @@ same model, adapter as loaded, the package system text, the image, and
 `Is this a close-up photo of a plant leaf? A Yes, a plant leaf fills most of the photo. B No.`
 with grammar `root ::= [AB]`. If P(A) ≤ P(B): "Isto não parece uma folha", retake, not queued.
 
-Mac, 20 BRACOL test images (4 per class, SHA-checked against manifest.csv) + 1 field photo of rust on
+Mac, 20 BRACOL test images (4 per class, SHA-checked against `data/manifest.csv`) + 1 field photo of rust on
 the plant: P(A) ≥ 0.88 for every leaf; building 0.005, cartoon 0.14. Small sample, not yet run over
 the whole test split or a set of non-leaf photos. The server does not reuse the encoded image
 between the two requests (cache stops before the image), so it costs a second image pass.
@@ -140,7 +140,7 @@ has no voice for the language, a short message. Never an English voice reading P
 
 - Sending the queue (stub).
 - The optional one-sentence explanation + Portuguese translator (package capability, see
-  `fine-tuning/explain_demo.py` and `translate_pt.py`); the app sends `max_tokens 1` only.
+  `model/fine-tuning/explain_demo.py` and `translate_pt.py`); the app sends `max_tokens 1` only.
 - Native-speaker check of the pt-BR "do today" / "call" lines (name + description are the package CARDS)
   and of the sw draft.
 - A tau tuned for the final package.

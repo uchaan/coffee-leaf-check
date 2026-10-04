@@ -125,7 +125,7 @@ async function boot() {
   startCamera();
 }
 
-// Package format (agentic-quantization/protocol/prompt_v1.txt, copied as prompt.txt):
+// Package format (protocol/prompt_v1.txt, copied as prompt.txt):
 // "### system", "### user", "### grammar" sections, used word for word.
 // A plain "SYSTEM: ... USER: ..." file is also accepted (no grammar).
 function parsePrompt(txt) {

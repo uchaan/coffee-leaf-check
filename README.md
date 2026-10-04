@@ -6,18 +6,24 @@ photo and answers A healthy · B rust · C cercospora (brown eye spot) · D phom
 Hack-Nation 7th Global AI Hackathon, World Bank challenge 04B (Small AI for development).
 
 The model was quantized by an **agentic pipeline**: give Claude Code one goal, and it plans, builds, evaluates and
-iterates on its own until every size target is met. See [`agentic-quantization/`](agentic-quantization/).
+iterates on its own until every size target is met. See [`model/quantization/`](model/quantization/).
 
 ## Repository
 
 | Path | What |
 |---|---|
 | [`RESULTS.md`](RESULTS.md) | full results: confidence intervals, per-disease scores, data and what it does not cover |
-| [`agentic-quantization/`](agentic-quantization/) | agentic GGUF quantization loop (Claude Code skill, workers, GPTQ-style quantizer), benchmark harness, image manifests, all results and the selected files |
-| [`fine-tuning/`](fine-tuning/) | coffee LoRA on the quantized base, export to GGUF, pt-BR translator, CNN / YOLO baselines, JMuBEN split |
+| [`data/`](data/) | image manifests (BRACOL, JMuBEN) with SHA-256 and split, label map, JMuBEN split, image preparation |
+| [`protocol/`](protocol/) | frozen prompt and chat templates shared by evaluation, calibration, training and the app |
+| [`eval/`](eval/) | benchmark harness, queues, public-file comparison; quantization scores in [`eval/results/`](eval/results/) |
+| [`model/quantization/`](model/quantization/) | agentic GGUF quantization loop (Claude Code skill, workers, GPTQ-style quantizer) and the selected files |
+| [`model/fine-tuning/`](model/fine-tuning/) | coffee LoRA on the quantized base, export to GGUF, pt-BR translator, CNN / YOLO baselines |
 | [`app/`](app/) | offline Android client: Termux `llama-server` + one static web page |
+| [`env.example.sh`](env.example.sh) | every path setting; copy to `env.sh` at the repository root (every shell script sources it) |
+| [`requirements.txt`](requirements.txt) | Python packages for `data/`, `eval/` and `model/quantization/` |
 
-Each folder has its own README with setup, commands and a file table.
+Each folder has its own README with setup, commands and a file table, and an `AGENTS.md` (imported by `CLAUDE.md`)
+for coding agents. Commands run from the repository root unless a README says otherwise.
 
 ## Model package
 
@@ -33,9 +39,9 @@ fine-tuned vision projector. Package **1.01 GB** (1.09 GB with the optional pt-B
 
 The weights are **not in this repository** and the model repo is private; they are available on request. Either name
 works: the app reads the file names from `app/config.json`. To rebuild them: the language model from
-[`agentic-quantization/`](agentic-quantization/) (row `ours-task` in
-[`selection/final.csv`](agentic-quantization/selection/final.csv), SHA-256 `cb88d42f…`), the adapter and vision projector
-from [`fine-tuning/`](fine-tuning/). [`fine-tuning/README.md`](fine-tuning/README.md) maps its build outputs to both names.
+[`model/quantization/`](model/quantization/) (row `ours-task` in
+[`selection/final.csv`](model/quantization/selection/final.csv), SHA-256 `cb88d42f…`), the adapter and vision projector
+from [`model/fine-tuning/`](model/fine-tuning/). [`model/fine-tuning/README.md`](model/fine-tuning/README.md) maps its build outputs to both names.
 
 ## Quick start
 
@@ -64,17 +70,24 @@ Send the prompt in [`app/prompt.txt`](app/prompt.txt) with thinking off and read
 
 | Step | Where | Hardware |
 |---|---|---|
-| Image manifests, benchmark harness, public-file comparison | [`agentic-quantization/benchmark/`](agentic-quantization/benchmark/) | NVIDIA GPU, llama.cpp `9a75705`; `harness.py cpu` for the 4-thread CPU check |
-| Quantization loop and file selection | [`agentic-quantization/`](agentic-quantization/) | Linux, NVIDIA GPUs (one worker per GPU) |
-| LoRA, vision projector, translator, CNN baselines | [`fine-tuning/`](fine-tuning/) | one CUDA GPU |
+| Image manifests and preparation | [`data/`](data/) | CPU |
+| Benchmark harness, public-file comparison | [`eval/`](eval/) | NVIDIA GPU, llama.cpp `9a75705`; `eval/harness.py cpu` for the 4-thread CPU check |
+| Quantization loop and file selection | [`model/quantization/`](model/quantization/) | Linux, NVIDIA GPUs (one worker per GPU) |
+| LoRA, vision projector, translator, CNN baselines | [`model/fine-tuning/`](model/fine-tuning/) | one CUDA GPU |
 | Phone / desktop app | [`app/`](app/) | Termux on Android, or any machine with `llama-server` |
 
-Python packages: [`agentic-quantization/requirements.txt`](agentic-quantization/requirements.txt) and
-[`fine-tuning/requirements.txt`](fine-tuning/requirements.txt) (Python 3.11). Paths come from
-[`agentic-quantization/loop/env.example.sh`](agentic-quantization/loop/env.example.sh), which both folders use.
+```bash
+cp env.example.sh env.sh                     # edit paths; env.sh stays out of git
+source env.sh
+pip install -r requirements.txt              # data/, eval/, model/quantization/ (Python 3.11)
+pip install -r model/fine-tuning/requirements.txt
+python data/prep_images.py bracol            # after the BRACOL download (data/README.md); 512 px images
+```
 
-Images are not included; [`manifest.csv`](agentic-quantization/manifest.csv) (BRACOL) and
-[`manifest_jmuben.csv`](agentic-quantization/manifest_jmuben.csv) (JMuBEN) list them with SHA-256 and split.
+Every command in the folder READMEs runs from the repository root, except the `cd` steps shown in `app/` and `model/quantization/`.
+
+Images are not included; [`data/manifest.csv`](data/manifest.csv) (BRACOL) and
+[`data/manifest_jmuben.csv`](data/manifest_jmuben.csv) (JMuBEN) list them with SHA-256 and split.
 
 ## Results
 

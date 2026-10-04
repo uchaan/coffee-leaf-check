@@ -1,5 +1,5 @@
 {
-  "_status": "pt name+looks: the fixed CARDS in fine-tuning/translate_pt.py (source of truth). pt today/call, en, sw: draft, not checked by native speakers. The app offers the languages in config.json (pt, en).",
+  "_status": "pt name+looks: the fixed CARDS in model/fine-tuning/translate_pt.py (source of truth). pt today/call, en, sw: draft, not checked by native speakers. The app offers the languages in config.json (pt, en).",
   "healthy": {
     "pt": {
       "name": "Folha sadia",

@@ -10,7 +10,7 @@
 *.tar.gz
 
 # local settings
-agentic-quantization/loop/env.sh
+env.sh
 .env
 
 # app: model package and generated voice stay out of git (also in app/.gitignore)
