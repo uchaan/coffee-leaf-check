@@ -78,7 +78,10 @@ say "not sure".
 
 Training data: BRACOL dev (337 train, 82 for epoch choice) + 559 JMuBEN originals; no test image used for training.
 
-## Credits
+## License and credits
+
+Code in this repository: [MIT](LICENSE). Model weights, datasets and the translator keep their own licenses, below.
+
 
 - Base model: [Qwen/Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B), Apache 2.0.
 - BRACOL: Krohling, Esgario, Ventura (2019), Mendeley Data, [doi:10.17632/yy2k5y8mxg.1](https://doi.org/10.17632/yy2k5y8mxg.1), CC BY 4.0.
