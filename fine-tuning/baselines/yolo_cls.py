@@ -1,11 +1,11 @@
-"""YOLO11 classification baseline on our BRACOL splits (2026-10-04). usage: yolo_cls.py SPLIT(hack|s2) MODEL(yolo11n-cls|yolo11s-cls|...) IMGSZ"""
+"""YOLO11 classification baseline on our BRACOL splits; trains on $WORK/yolo/<SPLIT> (make_yolo_dirs.py), tests on BRACOL test and
+writes $WORK/yolo/runs/<SPLIT>-<MODEL>-<IMGSZ>/result.json. usage: yolo_cls.py SPLIT(hack|hackjm) MODEL(yolo11n-cls|yolo11s-cls|yolo11m-cls) IMGSZ"""
 import json, os, sys
 import numpy as np
-os.environ["YOLO_OFFLINE"] = "0"
+os.environ["YOLO_OFFLINE"] = "0"                                    # ultralytics downloads the ImageNet yolo11*-cls.pt weights on first use
 from ultralytics import YOLO
 H = os.environ.get("WORK", "work")                                   # data, models and outputs (see ../agentic-quantization/loop/env.example.sh)
-AQ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../agentic-quantization")   # manifest, prompt, harness
-DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data"); split, mname, imgsz = sys.argv[1], sys.argv[2], int(sys.argv[3]); L = "ABCDE"
+split, mname, imgsz = sys.argv[1], sys.argv[2], int(sys.argv[3]); L = "ABCDE"
 name = f"{split}-{mname}-{imgsz}"; m = YOLO(f"{mname}.pt")
 m.train(data=f"{H}/yolo/{split}", epochs=60, imgsz=imgsz, batch=32, project=f"{H}/yolo/runs", name=name, exist_ok=True, seed=0, deterministic=True,
         fliplr=0.5, flipud=0.5, degrees=90, hsv_h=0.015, hsv_s=0.4, hsv_v=0.3, patience=100, verbose=False, plots=False, workers=4)

@@ -1,12 +1,14 @@
-"""CNN / YOLO on the grouped JMuBEN test split (240 held-out originals of manifest_jm.csv) and on BRACOL test (1,266)."""
+"""CNN / YOLO on the grouped JMuBEN test split (the 240 held-out originals, split=test in ../data/jmuben_grouped_split.csv) and on
+BRACOL test (1,266). Expects the five trained runs: $WORK/ft/cnn-hack, $WORK/ft/cnn-hackjm (cnn_baseline.py) and
+$WORK/yolo/runs/{hack-yolo11m-cls-384, hackjm-yolo11m-cls-384, hackjm-yolo11n-cls-224} (yolo_cls.py). usage: eval_cnn.py"""
 import csv, json, os, sys, numpy as np, torch, torchvision
 from PIL import Image
 from torchvision import transforms as T
-H = os.environ.get("WORK", "work")                                   # data, models and outputs (see ../agentic-quantization/loop/env.example.sh)
+H = os.environ.get("WORK", "work"); CACHE = os.environ.get("HN04B_CACHE", f"{H}/bracol/cache512")                                   # data, models and outputs (see ../agentic-quantization/loop/env.example.sh)
 AQ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../agentic-quantization")   # manifest, prompt, harness
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data"); L = "ABCDE"
 JM = [(f"{H}/jmuben/{r['path']}", r["label_letter"]) for r in csv.DictReader(open(f"{DATA}/jmuben_grouped_split.csv")) if r["split"] == "test"]
-BR = [(f"{H}/bracol/cache512/{r['sha256']}.jpg", r["label_letter"]) for r in csv.DictReader(open(f"{AQ}/manifest.csv")) if r["split"] == "test"]
+BR = [(f"{CACHE}/{r['sha256']}.jpg", r["label_letter"]) for r in csv.DictReader(open(f"{AQ}/manifest.csv")) if r["split"] == "test"]
 def score(p, y):
     f1 = []
     for c in L:

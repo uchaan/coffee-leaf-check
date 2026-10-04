@@ -1,7 +1,9 @@
-"""Offline EN -> pt-BR for the VLM's one-sentence explanation (opus-mt-en-ROMANCE, CTranslate2 int8, ~77 MB) with a fixed glossary for
-the disease names. Diagnosis cards themselves are a fixed pt-BR list (no generation)."""
+"""Offline EN -> pt-BR for the VLM's one-sentence explanation (opus-mt-en-ROMANCE, CTranslate2 int8, 82.3 MB) with the disease names
+replaced by "the diagnosis" before translation. Diagnosis cards themselves are a fixed pt-BR list (no generation).
+usage: translate_pt.py [MODEL_DIR]   (default translate-en-ptBR-opus-mt-ct2-int8; build it as in README.md)"""
 import re, sys, time, ctranslate2, sentencepiece as spm
-D = sys.argv[1] if len(sys.argv) > 1 else "translate/opus-mt-en-ROMANCE-ct2-int8"
+D = sys.argv[1] if len(sys.argv) > 1 else "translate-en-ptBR-opus-mt-ct2-int8"
+# pt-BR diagnosis cards, source of truth for "name" and "looks" in ../app/cards.json (not used by this script)
 CARDS = {"A": "Folha sadia — nenhum sinal de doença ou praga.", "B": "Ferrugem-do-cafeeiro — manchas alaranjadas e pó na face inferior da folha.",
          "C": "Cercosporiose (mancha-de-olho-pardo) — manchas marrons redondas com centro claro e halo amarelo.",
          "D": "Mancha-de-phoma — áreas escuras, quase pretas, geralmente na borda ou na ponta da folha.",

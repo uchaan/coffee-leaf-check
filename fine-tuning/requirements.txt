@@ -1,0 +1,17 @@
+# Python 3.11 (see ../agentic-quantization/loop/env.example.sh). Only transformers has a known minimum version.
+# train_lora.py, export_lora.py (export uses gguf-py from $LLAMA_CPP_DIR; train uses the pip gguf package)
+torch
+transformers>=5.5
+peft
+gguf
+safetensors
+numpy
+pillow
+# explain_demo.py, data/prep_images.py (via the benchmark harness)
+requests
+# baselines/
+torchvision
+ultralytics
+# translate_pt.py (ct2-transformers-converter also needs transformers)
+ctranslate2
+sentencepiece

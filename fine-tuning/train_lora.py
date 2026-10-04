@@ -1,8 +1,11 @@
 """LoRA on top of our quantised GGUF (quantise first, then fine-tune).
 The HF model's LM linears + tied embedding are replaced by the dequantised GGUF tensors (inverse of gptq_iq.py's HF->GGUF layout), the
-base stays frozen, and a LoRA adapter is trained on BRACOL dev only (split by sha256: val = int(sha,16) % 5 == 0) with the frozen prompt;
-loss = cross-entropy over the six option letters at the answer position (the harness reads the same renormalised letter probabilities).
-usage: train_lora.py --gguf BASE.gguf --out DIR [--check-only] [--rank 8 --epochs 4 --lr 2e-4]"""
+base stays frozen, and a LoRA adapter is trained with the frozen prompt on BRACOL dev (val = the 82 dev images with int(sha,16) % 5 == 0)
+plus an optional extra manifest (--extra, e.g. the 559 JMuBEN training originals). With --vision-lora the vision blocks start from the
+canonical Q8_0 mmproj and get LoRA too. Loss = cross-entropy over the six option letters at the answer position (the harness reads the
+same renormalised letter probabilities). Saves DIR/epochN after every epoch and DIR itself at the best val F1.
+Inputs: --image-dir holds the 512 px BRACOL dev images by basename (data/prep_images.py writes $WORK/bracol/dev512). Needs one CUDA GPU.
+usage: train_lora.py --gguf BASE.gguf --out DIR [--check-only] [--rank 8 --epochs 4 --lr 2e-4 ...]   (release command: README.md)"""
 import argparse, csv, json, os, sys, time, types
 import numpy as np, torch
 import gguf
@@ -12,7 +15,6 @@ from transformers import AutoProcessor, AutoModelForImageTextToText
 
 H = os.environ.get("WORK", "work")                                   # data, models and outputs (see ../agentic-quantization/loop/env.example.sh)
 AQ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../agentic-quantization")   # manifest, prompt, harness
-DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 ap = argparse.ArgumentParser()
 ap.add_argument("--hf", default=f"{H}/models/Qwen3.5-2B"); ap.add_argument("--gguf", required=True); ap.add_argument("--out", required=True)
 ap.add_argument("--manifest", default=f"{AQ}/manifest.csv"); ap.add_argument("--image-dir", default=f"{H}/bracol/dev512")
