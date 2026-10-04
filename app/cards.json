@@ -1,0 +1,141 @@
+{
+  "_status": "pt name+looks: Youchan's fixed CARDS (translate_pt.py), source of truth. pt today/call, en, sw: DRAFT, not checked by native speakers.",
+  "healthy": {
+    "pt": {
+      "name": "Folha sadia",
+      "looks": "Nenhum sinal de doença ou praga.",
+      "today": "Nada a fazer. Confira algumas folhas de outros pés, inclusive a parte de baixo.",
+      "call": "Se aparecerem manchas ou pó em outros pés, confira essas folhas também.",
+      "source": "Sintomas: base de dados BRACOL (Esgario et al., 2020)."
+    },
+    "en": {
+      "name": "Healthy leaf",
+      "looks": "Evenly green and glossy. No spots, powder, holes or dry patches.",
+      "today": "Nothing to do. Check a few leaves on other trees, including the underside.",
+      "call": "If you see spots or powder on other trees, check those leaves too.",
+      "source": "Symptoms: BRACOL dataset (Esgario et al., 2020)."
+    },
+    "sw": {
+      "name": "Jani lenye afya",
+      "looks": "Kijani na linang'aa sawasawa. Hakuna madoa, unga, matundu wala sehemu zilizokauka.",
+      "today": "Hakuna la kufanya. Angalia majani machache ya miti mingine, pamoja na upande wa chini.",
+      "call": "Ukiona madoa au unga kwenye miti mingine, kagua majani hayo pia.",
+      "source": "Dalili: hifadhidata ya BRACOL (Esgario na wenzake, 2020)."
+    }
+  },
+  "rust": {
+    "pt": {
+      "name": "Ferrugem-do-cafeeiro",
+      "looks": "Manchas alaranjadas e pó na face inferior da folha.",
+      "today": "Marque este pé. Olhe a parte de baixo das folhas dos pés vizinhos. Recolha as folhas caídas.",
+      "call": "Chame o técnico agrícola se vários pés tiverem pó, ou se as folhas estiverem caindo antes da hora.",
+      "source": "Sintomas: BRACOL (Esgario et al., 2020). Orientação: recomendações gerais sobre ferrugem; confirme com a assistência técnica local."
+    },
+    "en": {
+      "name": "Coffee leaf rust",
+      "looks": "Yellow-orange powder under the leaf; pale yellow spots on top that turn brown.",
+      "today": "Mark this tree. Check the underside of leaves on the trees next to it. Rake up fallen leaves.",
+      "call": "Call the extension officer if several trees have powder, or leaves are falling early.",
+      "source": "Symptoms: BRACOL (Esgario et al., 2020). Advice: general coffee rust guidance; confirm locally."
+    },
+    "sw": {
+      "name": "Kutu ya majani ya kahawa",
+      "looks": "Unga wa rangi ya njano-machungwa chini ya jani; madoa ya njano juu yanayogeuka kahawia.",
+      "today": "Weka alama kwenye mti huu. Kagua upande wa chini wa majani ya miti ya jirani. Kusanya majani yaliyoanguka.",
+      "call": "Mpigie afisa ugani ikiwa miti kadhaa ina unga, au majani yanaanguka mapema.",
+      "source": "Dalili: BRACOL (Esgario na wenzake, 2020). Ushauri: mwongozo wa jumla wa kutu ya kahawa; thibitisha kwa wataalamu wa eneo lako."
+    }
+  },
+  "cercospora": {
+    "pt": {
+      "name": "Cercosporiose (mancha-de-olho-pardo)",
+      "looks": "Manchas marrons redondas com centro claro e halo amarelo.",
+      "today": "Veja se este pé pega sol forte o dia todo ou parece mal nutrido. Mantenha cobertura morta em volta do tronco.",
+      "call": "Chame o técnico agrícola se as manchas aparecerem também nos frutos.",
+      "source": "Sintomas: BRACOL (Esgario et al., 2020). Orientação: recomendações gerais sobre cercosporiose; confirme com a assistência técnica local."
+    },
+    "en": {
+      "name": "Brown eye spot (Cercospora)",
+      "looks": "Small round brown spots with a light grey centre, often with a yellow ring.",
+      "today": "Check whether this tree gets full sun all day or looks underfed. Keep mulch around the base.",
+      "call": "Call the extension officer if the spots also appear on the coffee cherries.",
+      "source": "Symptoms: BRACOL (Esgario et al., 2020). Advice: general Cercospora guidance; confirm locally."
+    },
+    "sw": {
+      "name": "Madoa ya jicho kahawia (Cercospora)",
+      "looks": "Madoa madogo ya mviringo ya kahawia yenye kitovu cha kijivu, mara nyingi na pete ya njano.",
+      "today": "Angalia kama mti huu unapata jua kali siku nzima au unaonekana kukosa chakula. Weka matandazo kuzunguka shina.",
+      "call": "Mpigie afisa ugani ikiwa madoa yanaonekana pia kwenye matunda ya kahawa.",
+      "source": "Dalili: BRACOL (Esgario na wenzake, 2020). Ushauri: mwongozo wa jumla wa Cercospora; thibitisha kwa wataalamu wa eneo lako."
+    }
+  },
+  "phoma": {
+    "pt": {
+      "name": "Mancha-de-phoma",
+      "looks": "Áreas escuras, quase pretas, geralmente na borda ou na ponta da folha.",
+      "today": "Anote onde fica este pé na lavoura. Veja se ele pega vento frio.",
+      "call": "Chame o técnico agrícola se os brotos novos estiverem secando.",
+      "source": "Sintomas: BRACOL (Esgario et al., 2020). Orientação: recomendações gerais sobre Phoma; confirme com a assistência técnica local."
+    },
+    "en": {
+      "name": "Phoma leaf spot",
+      "looks": "Dark brown to black dead patches with uneven edges, often starting at the tip or edge.",
+      "today": "Note where on the farm this tree is. Check if it is exposed to cold wind.",
+      "call": "Call the extension officer if young shoots are dying back.",
+      "source": "Symptoms: BRACOL (Esgario et al., 2020). Advice: general Phoma guidance; confirm locally."
+    },
+    "sw": {
+      "name": "Madoa ya Phoma",
+      "looks": "Sehemu zilizokufa za kahawia iliyokolea hadi nyeusi, kingo zisizo sawa, mara nyingi zikianzia ncha au ukingo.",
+      "today": "Kumbuka mti huu uko wapi shambani. Angalia kama unapigwa na upepo baridi.",
+      "call": "Mpigie afisa ugani ikiwa machipukizi machanga yanakauka.",
+      "source": "Dalili: BRACOL (Esgario na wenzake, 2020). Ushauri: mwongozo wa jumla wa Phoma; thibitisha kwa wataalamu wa eneo lako."
+    }
+  },
+  "miner": {
+    "pt": {
+      "name": "Bicho-mineiro",
+      "looks": "Manchas marrons secas e irregulares, causadas por larvas dentro da folha.",
+      "today": "Em pé pouco atacado, retire as folhas minadas e destrua-as. Não pulverize sem orientação: o veneno também mata os insetos que comem o bicho-mineiro.",
+      "call": "Chame o técnico agrícola se muitas folhas, em muitos pés, estiverem minadas.",
+      "source": "Sintomas: BRACOL (Esgario et al., 2020). Orientação: recomendações gerais sobre bicho-mineiro; confirme com a assistência técnica local."
+    },
+    "en": {
+      "name": "Leaf miner",
+      "looks": "Light brown, dry, papery patches of uneven shape; the surface can peel off.",
+      "today": "On a lightly affected tree, pick the mined leaves and destroy them. Avoid spraying without advice; it also kills the insects that eat leaf miners.",
+      "call": "Call the extension officer if many leaves on many trees are mined.",
+      "source": "Symptoms: BRACOL (Esgario et al., 2020). Advice: general leaf miner guidance; confirm locally."
+    },
+    "sw": {
+      "name": "Mchimba jani",
+      "looks": "Sehemu za kahawia hafifu, kavu kama karatasi, zisizo na umbo maalum; ngozi ya jani inaweza kubanduka.",
+      "today": "Kwenye mti ulioathirika kidogo, chuma majani yaliyochimbwa na uyaharibu. Usinyunyize dawa bila ushauri; inaua pia wadudu wanaokula mchimba jani.",
+      "call": "Mpigie afisa ugani ikiwa majani mengi kwenye miti mingi yamechimbwa.",
+      "source": "Dalili: BRACOL (Esgario na wenzake, 2020). Ushauri: mwongozo wa jumla wa mchimba jani; thibitisha kwa wataalamu wa eneo lako."
+    }
+  },
+  "unsure": {
+    "pt": {
+      "name": "Não tenho certeza",
+      "looks": "Mostre a folha a um técnico agrícola.",
+      "today": "Tire a foto de novo: uma folha só, ocupando a foto, com boa luz.",
+      "call": "Ainda sem certeza? A foto foi salva. Mostre a folha ao técnico agrícola; ela será enviada quando houver sinal.",
+      "source": "O aplicativo só responde quando tem confiança suficiente. Quem decide é uma pessoa."
+    },
+    "en": {
+      "name": "Not sure",
+      "looks": "It cannot tell from this photo, so it will not guess.",
+      "today": "Take the photo again: one leaf, filling the photo, in good light.",
+      "call": "Still not sure? The photo is saved. Show the leaf to the extension officer; it will be sent when there is signal.",
+      "source": "The tool only answers when it is confident enough. A person makes the final call."
+    },
+    "sw": {
+      "name": "Sina uhakika",
+      "looks": "Hakiwezi kujua kutokana na picha hii, kwa hiyo hakitabahatisha.",
+      "today": "Piga picha tena: jani moja, lijaze picha, kwenye mwanga mzuri.",
+      "call": "Bado hakuna uhakika? Picha imehifadhiwa. Mwonyeshe afisa ugani jani hili; itatumwa mtandao ukipatikana.",
+      "source": "Kifaa hujibu tu kikiwa na uhakika wa kutosha. Uamuzi wa mwisho ni wa mtu."
+    }
+  }
+}

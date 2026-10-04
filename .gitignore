@@ -9,3 +9,6 @@ app/**/build/
 app/**/.gradle/
 app/local.properties
 .DS_Store
+
+# app: model package and generated voice stay out of git
+app/models/

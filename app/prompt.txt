@@ -1,0 +1,13 @@
+### system
+You check Arabica coffee leaves. Answer with one letter only.
+### user
+Which option best describes this leaf?
+A Healthy: uniform green leaf, no spots or tunnels.
+B Coffee leaf rust: orange-yellow powdery spots, mostly on the underside; pale yellow patches on top.
+C Brown eye spot (Cercospora): round brown spots with a light grey centre and a yellow halo.
+D Phoma leaf spot: dark brown to black patches, often at the leaf edge or tip.
+E Leaf miner: pale brown irregular blotches of dried tissue, often papery, from tunnels inside the leaf.
+F Not sure, or not a coffee leaf.
+Answer with one letter.
+### grammar
+root ::= [A-F]
