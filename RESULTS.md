@@ -34,6 +34,8 @@ photo of one leaf (resized to 512 px)
 
 CPU check (4 threads, base model): 3.2 s per image, 1.7 GB peak memory.
 
+The phone app in [`app/`](app/) shows the answer letter and its fixed card. The explanation sentence and its translation are package capabilities ([`fine-tuning/explain_demo.py`](fine-tuning/explain_demo.py), [`fine-tuning/translate_pt.py`](fine-tuning/translate_pt.py)) and are not in the app yet.
+
 ## 2. Quantisation: smaller than the public files, and it still works
 
 Same base model, same evaluation for every file. Package = language model + 8-bit vision projector.
@@ -54,7 +56,7 @@ Same base model, same evaluation for every file. Package = language model + 8-bi
 
 ## 2b. Original model vs ours
 
-All numbers from the same evaluation server (RTX 4090). Differences are against the original BF16 model.
+All numbers from the same evaluation server (RTX 4090). Differences are against the original BF16 model. The A100 measures the final package at 90.8 % / F1 0.880 (section 3).
 
 | | Original BF16 (4.26 GB) | Ours, quantised only (0.999 GB) | Δ | Ours, final package (1.01 GB) | Δ |
 |---|---:|---:|---:|---:|---:|
@@ -126,7 +128,7 @@ Our two rows were measured on the RTX 4090, the CNN rows on the A100, on the sam
 - Answers come from a fixed list of six. Anything else is impossible by construction.
 - F, or a low-confidence answer, shows "not sure — ask an agricultural technician". A person makes the final call.
 - Disease names in Portuguese come from fixed, human-written cards. The model never generates them.
-- The explanation sentence is shown as "what the model saw" and translated offline. It is never used as advice.
+- Where the explanation sentence is shown (package demo, not yet the phone app), it is labelled "what the model saw" and translated offline. It is never used as advice.
 
 ## 6. Data and what it does not cover
 

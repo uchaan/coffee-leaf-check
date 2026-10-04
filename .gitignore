@@ -1,14 +1,43 @@
 # model files and run outputs never go into git
 *.gguf
 *.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
 *.kld
-__pycache__/
+*.zip
+*.tar.gz
+
+# local settings
 agentic-quantization/loop/env.sh
+.env
+
+# app: model package and generated voice stay out of git (also in app/.gitignore)
+app/models/
+app/audio/
 # Android / app build outputs
 app/**/build/
 app/**/.gradle/
 app/local.properties
-.DS_Store
 
-# app: model package and generated voice stay out of git
-app/models/
+# local data and work folders (env.example.sh defaults: WORK=work, LLAMA_CPP_DIR=llama.cpp)
+work/
+llama.cpp/
+runs/
+images/
+translate-en-ptBR-opus-mt-ct2-int8/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
